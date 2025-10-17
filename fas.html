@@ -67,7 +67,7 @@
             
             <p id="loading-status" class="text-sm text-gray-600 mt-4 text-center">Initializing database and loading data...</p>
             <p id="date-display" class="text-xs text-gray-500 mt-2 text-center"></p>
-            <p class="text-sm font-bold text-red-600 mt-2 text-center">Note: Give attendance between 7PM to 9PM.</p>
+            <p class="text-sm font-bold text-red-600 mt-2 text-center">Note: Attendance input is only allowed between 7:00 PM to 9:00 PM.</p>
         </div>
 
         <div id="room-container" class="max-w-6xl mx-auto">
@@ -81,9 +81,6 @@
             <p id="error-text" class="text-sm"></p>
         </div>
 
-        <div class="max-w-6xl mx-auto mt-6 pt-4 border-t border-gray-300 text-center">
-             <p class="text-sm text-gray-500">Automatic attendance reset scheduled for 6:00 PM daily.</p>
-        </div>
     </div>
 
     <script type="module">
@@ -115,6 +112,12 @@
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
+        }
+
+        function isWithinAllowedTime() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            return currentHour >= 19 && currentHour < 21;
         }
 
         const totalCountDisplay = document.getElementById('total-count-display');
@@ -183,13 +186,21 @@
                     min="0"
                     placeholder="0"
                     class="input-number"
+                    ${!isWithinAllowedTime() ? 'disabled' : ''}
                 />
             `;
 
             const inputElement = card.querySelector(`#input-${roomNumber}`);
-            inputElement.addEventListener('input', (event) => {
-                updateAttendance(roomNumber, event.target.value);
-            });
+            
+            if (isWithinAllowedTime()) {
+                inputElement.addEventListener('input', (event) => {
+                    updateAttendance(roomNumber, event.target.value);
+                });
+            } else {
+                inputElement.style.opacity = '0.6';
+                inputElement.style.cursor = 'not-allowed';
+            }
+            
             roomGrid.appendChild(card);
         }
 
@@ -335,6 +346,11 @@
 
         async function updateAttendance(roomNumber, value) {
             if (!db) return;
+
+            if (!isWithinAllowedTime()) {
+                displayError('Attendance can only be updated between 7:00 PM to 9:00 PM.');
+                return;
+            }
 
             let count = parseInt(value);
             if (isNaN(count) || count < 0) {
