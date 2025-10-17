@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ Floor Attendance Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            min-height: 100vh;
+        }
+        .room-grid::-webkit-scrollbar {
+            height: 6px;
+        }
+        .room-grid::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
+        .room-card {
+            transition: all 0.2s ease;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .room-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .input-number {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            color: #6366f1;
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+        .input-number:focus {
+            background: white;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+        .gradient-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="min-h-screen p-6 sm:p-8">
+
+        <div class="max-w-6xl mx-auto mb-6">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 text-center">Floor Attendance Manager</h1>
+
+            <div id="total-attendance-card" class="gradient-card p-6 sm:p-8 rounded-3xl shadow-xl">
+                <p class="text-sm uppercase font-medium text-white/90 mb-2 text-center tracking-wider">Total Students Present on Floor</p>
+                <div class="flex justify-center items-center">
+                    <span id="total-count-display" class="text-6xl sm:text-7xl font-bold text-white">...</span>
+                </div>
+            </div>
+            
+            <p id="loading-status" class="text-sm text-gray-600 mt-4 text-center">Initializing database and loading data...</p>
+            <p id="date-display" class="text-xs text-gray-500 mt-2 text-center"></p>
+        </div>
+
+        <div id="room-container" class="max-w-6xl mx-auto">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Room Attendance Inputs</h2>
+            <div id="room-grid" class="room-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            </div>
+        </div>
+
+        <div id="error-message" class="max-w-6xl mx-auto mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl hidden" role="alert">
+            <p class="font-bold">Error:</p>
+            <p id="error-text" class="text-sm"></p>
+        </div>
+
+        <div class="max-w-6xl mx-auto mt-6 pt-4 border-t border-gray-300 text-center">
+             <p class="text-sm text-gray-500">Automatic attendance reset scheduled for 6:00 PM daily.</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, update, get } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'floor-attendance-system';
+
+        const firebaseConfig = {
+                    apiKey: "AIzaSyBYTnrnXjBCvlfEu2nDc0IVIZ_rtzlix9s",
+                    authDomain: "floor-attendance-system.firebaseapp.com",
+                    databaseURL: "https://floor-attendance-system-default-rtdb.firebaseio.com",
+                    projectId: "floor-attendance-system",
+                    storageBucket: "floor-attendance-system.firebasestorage.app",
+                    messagingSenderId: "721240132639",
+                    appId: "1:721240132639:web:629b90ae09d3fcbcc1d92a",
+                    measurementId: "G-RZ8YDY6F4S"
+                };
+
+        let db;
+        let userId = 'anonymous-user';
+
+        const ROOMS = Array.from({ length: 16 }, (_, i) => 402 + i);
+        
+        function getTodayDateKey() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        const totalCountDisplay = document.getElementById('total-count-display');
+        const roomGrid = document.getElementById('room-grid');
+        const loadingStatus = document.getElementById('loading-status');
+        const dateDisplay = document.getElementById('date-display');
+        const errorDiv = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+
+        function displayError(message) {
+            console.error(message);
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+            loadingStatus.classList.add('hidden');
+        }
+
+        async function initializeFirebase() {
+            try {
+                if (Object.keys(firebaseConfig).length === 0) {
+                    throw new Error("Firebase configuration is missing. Cannot initialize database.");
+                }
+
+                const app = initializeApp(firebaseConfig);
+                db = getDatabase(app);
+
+                try {
+                    const analytics = getAnalytics(app);
+                    console.log('Firebase Analytics initialized.');
+                } catch (e) {
+                    console.warn('Firebase Analytics not initialized:', e.message);
+                }
+
+                loadingStatus.textContent = 'Connected. Setting up real-time listener...';
+                setupRealtimeListener();
+                checkAndRunDailyReset();
+
+            } catch (error) {
+                displayError(`Firebase Initialization failed: ${error.message}`);
+            }
+        }
+
+        function renderRoomCard(roomNumber, currentCount) {
+            const docId = `room_${roomNumber}`;
+            const existingCard = document.getElementById(docId);
+
+            if (existingCard) {
+                const input = existingCard.querySelector('input');
+                if (input && parseInt(input.value) !== currentCount) {
+                    if (document.activeElement !== input) {
+                        input.value = currentCount;
+                    }
+                }
+                return;
+            }
+
+            const card = document.createElement('div');
+            card.id = docId;
+            card.className = 'room-card p-5 rounded-2xl';
+            card.innerHTML = `
+                <div class="text-lg font-bold text-gray-800 mb-3">Room ${roomNumber}</div>
+                <div class="text-sm text-gray-500 mb-2">Students Present:</div>
+                <input
+                    type="number"
+                    id="input-${roomNumber}"
+                    value="${currentCount}"
+                    min="0"
+                    placeholder="0"
+                    class="input-number"
+                />
+            `;
+
+            const inputElement = card.querySelector(`#input-${roomNumber}`);
+            inputElement.addEventListener('input', (event) => {
+                updateAttendance(roomNumber, event.target.value);
+            });
+            roomGrid.appendChild(card);
+        }
+
+        function calculateTotal(attendanceData) {
+            const total = attendanceData.reduce((sum, doc) => sum + (doc.present_count || 0), 0);
+            totalCountDisplay.textContent = total;
+        }
+
+        function setupRealtimeListener() {
+            if (!db) return;
+
+            const todayDateKey = getTodayDateKey();
+            dateDisplay.innerHTML = `Today's Date: <strong>${todayDateKey}</strong>`;
+            
+            const attendanceRef = ref(db, `attendance/${todayDateKey}`);
+
+            onValue(attendanceRef, (snapshot) => {
+                loadingStatus.classList.add('hidden');
+                
+                const data = snapshot.val() || {};
+                
+                if (Object.keys(data).length === 0) {
+                    console.log('No data found for today, initializing...');
+                    seedInitialRooms();
+                }
+                
+                ROOMS.forEach(room => {
+                    const roomKey = `room_${room}`;
+                    const roomData = data[roomKey];
+                    const presentCount = roomData ? (roomData.present_count || 0) : 0;
+                    renderRoomCard(room, presentCount);
+                });
+
+                const attendanceArray = Object.values(data);
+                calculateTotal(attendanceArray);
+
+            }, (error) => {
+                displayError(`Real-time listener failed: ${error.message}`);
+            });
+        }
+
+        async function seedInitialRooms() {
+            if (!db) return;
+            
+            const todayDateKey = getTodayDateKey();
+            console.log(`Initializing database for date: ${todayDateKey}`);
+            
+            const updates = {};
+
+            ROOMS.forEach(room => {
+                const roomKey = `room_${room}`;
+                updates[`attendance/${todayDateKey}/${roomKey}`] = {
+                    room: room,
+                    present_count: 0,
+                    updated_by: 'system',
+                    timestamp: new Date().toISOString(),
+                    date: todayDateKey
+                };
+            });
+
+            try {
+                await update(ref(db), updates);
+                console.log(`Database structure initialized for ${todayDateKey} with ${ROOMS.length} rooms.`);
+            } catch (error) {
+                console.error('Failed to seed initial rooms:', error.message);
+                displayError(`Failed to initialize database: ${error.message}`);
+            }
+        }
+        
+        async function clearAllAttendance(isManual = false) {
+            if (!db) {
+                if (isManual) displayError("Database not initialized. Please wait.");
+                return;
+            }
+
+            errorDiv.classList.add('hidden');
+            loadingStatus.textContent = 'Auto-reset in progress...';
+
+            try {
+                const todayDateKey = getTodayDateKey();
+                const updates = {};
+
+                ROOMS.forEach(room => {
+                    const roomKey = `room_${room}`;
+                    updates[`attendance/${todayDateKey}/${roomKey}`] = {
+                        room: room,
+                        present_count: 0,
+                        updated_by: userId,
+                        timestamp: new Date().toISOString()
+                    };
+                });
+
+                updates['reset_tracker/last_reset'] = new Date().toISOString();
+
+                await update(ref(db), updates);
+
+                console.log('Automatic daily reset successfully completed.');
+
+            } catch (error) {
+                displayError(`Failed to complete automatic reset: ${error.message}`);
+            } finally {
+                loadingStatus.textContent = 'Database loaded and real-time listener active.';
+            }
+        }
+
+        async function checkAndRunDailyReset() {
+            if (!db) return;
+
+            const now = new Date();
+            
+            const targetResetTimeToday = new Date();
+            targetResetTimeToday.setHours(18, 0, 0, 0);
+
+            if (now.getTime() < targetResetTimeToday.getTime()) {
+                console.log("Auto-reset skipped: Current time is before 6:00 PM.");
+                return;
+            }
+            
+            const resetRef = ref(db, 'reset_tracker/last_reset');
+
+            try {
+                const snapshot = await get(resetRef);
+                const lastResetTimestamp = snapshot.exists() ? snapshot.val() : null;
+                let lastResetTime = null;
+
+                if (lastResetTimestamp) {
+                    lastResetTime = new Date(lastResetTimestamp);
+                }
+
+                const resetAlreadyDone = lastResetTime && lastResetTime.getTime() > targetResetTimeToday.getTime();
+
+                if (!resetAlreadyDone) {
+                    console.log("Auto-reset triggered: Past 6:00 PM and reset has not run today. Executing reset...");
+                    await clearAllAttendance(false); 
+                } else {
+                    console.log("Auto-reset skipped: Already performed today after 6:00 PM.");
+                }
+
+            } catch (error) {
+                console.error("Error during automatic reset check:", error.message);
+            }
+        }
+
+        async function updateAttendance(roomNumber, value) {
+            if (!db) return;
+
+            let count = parseInt(value);
+            if (isNaN(count) || count < 0) {
+                count = 0;
+            }
+
+            const todayDateKey = getTodayDateKey();
+            const roomKey = `room_${roomNumber}`;
+            const roomRef = ref(db, `attendance/${todayDateKey}/${roomKey}`);
+
+            try {
+                await set(roomRef, {
+                    room: roomNumber,
+                    present_count: count,
+                    updated_by: userId,
+                    timestamp: new Date().toISOString()
+                });
+
+            } catch (error) {
+                displayError(`Failed to update attendance for Room ${roomNumber}: ${error.message}`);
+            }
+        }
+
+        initializeFirebase();
+
+    </script>
+</body>
+</html>
