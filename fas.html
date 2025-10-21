@@ -37,9 +37,9 @@
         <div id="notification-container" class="fixed top-4 left-4 z-50 space-y-3 max-w-sm">
         </div>
 
-        <div id="user-info-bar" class="user-info-compact fixed top-4 right-4 bg-white rounded-xl shadow-lg px-4 py-3 flex items-center gap-3 hidden z-40 backdrop-blur-sm bg-opacity-95">
-            <span class="user-icon text-2xl transition-all duration-300">👤</span>
-            <div class="user-text transition-all duration-300">
+        <div id="user-info-bar" class="user-info-bar fixed top-4 right-4 bg-white hidden z-40">
+            <span class="user-icon">👤</span>
+            <div class="user-text">
                 <p class="text-xs text-gray-500">Logged in as</p>
                 <p id="current-user-display" class="text-sm font-bold text-gray-800"></p>
             </div>
@@ -219,6 +219,11 @@
         let lastNotifiedTotal = 0;
         let hasShownInputWindowReminder = false;
         let isAuthenticated = false;
+        let sentNotifications = {
+            reminder1: false,
+            reminder2: false,
+            reminder3: false
+        };
         let userProfile = {
             role: 'user',
             email: '',
@@ -366,6 +371,7 @@
                 isAuthenticated = false;
                 
                 userInfoBar.classList.add('hidden');
+                userInfoBar.classList.remove('expanded');
                 
                 showNotification('You have been logged out.', 'info', 3000);
                 
@@ -373,7 +379,6 @@
             }
         }
 
-        // Google Sign-In
         googleLoginBtn.addEventListener('click', async () => {
             try {
                 const provider = new GoogleAuthProvider();
@@ -388,7 +393,23 @@
             }
         });
 
-        logoutBtn.addEventListener('click', logout);
+        userInfoBar.addEventListener('click', (e) => {
+            if (e.target.id === 'logout-btn' || e.target.closest('#logout-btn')) {
+                return;
+            }
+            userInfoBar.classList.toggle('expanded');
+        });
+
+        logoutBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            logout();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!userInfoBar.contains(e.target)) {
+                userInfoBar.classList.remove('expanded');
+            }
+        });
 
         closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
         saveProfileBtn.addEventListener('click', () => saveUserProfile());
@@ -673,19 +694,6 @@
             }
         }, 60000);
 
-        let lastScrollTop = 0;
-        window.addEventListener('scroll', () => {
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
-            if (scrollTop > 100) {
-                userInfoBar.classList.add('user-info-scrolled');
-            } else {
-                userInfoBar.classList.remove('user-info-scrolled');
-            }
-            
-            lastScrollTop = scrollTop;
-        });
-
         function showNotification(message, type = 'info', duration = 5000) {
             const notification = document.createElement('div');
             notification.className = `notification notification-${type} text-white p-4 rounded-lg shadow-lg flex items-start gap-3`;
@@ -732,23 +740,57 @@
         }
 
         function checkInputWindowAndNotify() {
-            if (!isViewingToday || hasShownInputWindowReminder) return;
+            if (!isViewingToday || !isAuthenticated || !userEmail) return;
             
             const now = new Date();
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
             
-            if (currentHour === 19 && currentMinute < 5) {
-                showNotification('Attendance input window is now open! You can update room attendance until 9:00 PM.', 'info', 8000);
-                hasShownInputWindowReminder = true;
+            if (currentHour === 19 && currentMinute >= 0 && currentMinute < 5 && !sentNotifications.reminder1) {
+                showNotification(`🔔 Reminder for ${userId}: Attendance input window is now OPEN! Please update room attendance until 9:00 PM.`, 'info', 10000);
+                sendEmailReminder('first');
+                sentNotifications.reminder1 = true;
             }
-            else if (currentHour === 20 && currentMinute >= 30 && currentMinute < 35) {
-                showNotification('Reminder: Attendance input window closes in 30 minutes (9:00 PM).', 'warning', 8000);
-                hasShownInputWindowReminder = true;
+            else if (currentHour === 20 && currentMinute >= 0 && currentMinute < 5 && !sentNotifications.reminder2) {
+                showNotification(`⏰ Second Reminder for ${userId}: Only 1 hour left! Attendance window closes at 9:00 PM.`, 'warning', 10000);
+                sendEmailReminder('second');
+                sentNotifications.reminder2 = true;
             }
-            else if (currentHour === 20 && currentMinute >= 50) {
-                showNotification('Final Reminder: Attendance input window closes in 10 minutes!', 'danger', 10000);
-                hasShownInputWindowReminder = true;
+            else if (currentHour === 20 && currentMinute >= 45 && currentMinute < 50 && !sentNotifications.reminder3) {
+                showNotification(`🚨 FINAL Reminder for ${userId}: Only 15 minutes left to submit attendance! Window closes at 9:00 PM.`, 'danger', 12000);
+                sendEmailReminder('final');
+                sentNotifications.reminder3 = true;
+            }
+            
+            if (currentHour < 19 || currentHour >= 21) {
+                sentNotifications = {
+                    reminder1: false,
+                    reminder2: false,
+                    reminder3: false
+                };
+            }
+        }
+
+        async function sendEmailReminder(type) {
+            if (!db || !userId || !userEmail) return;
+            
+            const reminderData = {
+                user: userId,
+                email: userEmail,
+                type: type,
+                timestamp: new Date().toISOString(),
+                date: getTodayDateKey(),
+                message: type === 'first' ? 'Attendance window is now open (7:00 PM - 9:00 PM)' :
+                         type === 'second' ? 'Only 1 hour left to submit attendance' :
+                         'Final reminder: 15 minutes left to submit attendance'
+            };
+            
+            try {
+                const reminderRef = ref(db, `email_reminders/${Date.now()}`);
+                await set(reminderRef, reminderData);
+                console.log(`Email reminder (${type}) logged for ${userEmail}`);
+            } catch (error) {
+                console.error('Failed to log email reminder:', error);
             }
         }
 
