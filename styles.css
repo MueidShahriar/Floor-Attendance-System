@@ -1,15 +1,11 @@
-/* Floor Attendance System - Custom Styles */
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 
-/* Base Styles */
 body {
     font-family: 'Inter', sans-serif;
     background-color: #f1f5f9;
     min-height: 100vh;
 }
 
-/* Scrollbar Styles */
 .room-grid::-webkit-scrollbar {
     height: 6px;
 }
@@ -19,7 +15,6 @@ body {
     border-radius: 3px;
 }
 
-/* Room Card Styles */
 .room-card {
     transition: all 0.2s ease;
     background: white;
@@ -31,7 +26,6 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Input Number Styles */
 .input-number {
     font-size: 2rem;
     font-weight: 700;
@@ -52,12 +46,10 @@ body {
     outline: none;
 }
 
-/* Gradient Card */
 .gradient-card {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-/* Notification Styles */
 .notification {
     animation: slideIn 0.3s ease-out;
 }
@@ -89,12 +81,10 @@ body {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 }
 
-/* Modal Styles */
 .modal-backdrop {
     backdrop-filter: blur(4px);
 }
 
-/* Activity Log Styles */
 .activity-log-item {
     transition: all 0.2s ease;
 }
@@ -104,7 +94,6 @@ body {
     transform: translateX(4px);
 }
 
-/* User Badge Styles */
 .user-badge {
     display: inline-flex;
     align-items: center;
@@ -125,7 +114,6 @@ body {
     color: #991b1b;
 }
 
-/* User Info Bar Styles */
 .user-info-compact {
     transition: all 0.3s ease;
 }

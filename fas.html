@@ -7,12 +7,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📋</text></svg>">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
 
-    <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4">
             <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Login to Floor Attendance System</h2>
@@ -37,11 +34,9 @@
 
     <div id="app" class="min-h-screen p-6 sm:p-8">
 
-        <!-- Notification Container -->
         <div id="notification-container" class="fixed top-4 left-4 z-50 space-y-3 max-w-sm">
         </div>
 
-        <!-- User Info Bar -->
         <div id="user-info-bar" class="user-info-compact fixed top-4 right-4 bg-white rounded-xl shadow-lg px-4 py-3 flex items-center gap-3 hidden z-40 backdrop-blur-sm bg-opacity-95">
             <span class="user-icon text-2xl transition-all duration-300">👤</span>
             <div class="user-text transition-all duration-300">
@@ -59,7 +54,6 @@
         <div class="max-w-6xl mx-auto mb-6">
             <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 text-center">Floor Attendance Manager</h1>
 
-            <!-- Date Selector -->
             <div class="bg-white p-4 rounded-2xl shadow-md mb-6">
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                     <label for="date-picker" class="text-sm font-semibold text-gray-700">View Attendance for:</label>
@@ -103,7 +97,6 @@
 
     </div>
 
-    <!-- Activity Log Modal -->
     <div id="activity-log-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] flex flex-col">
             <div class="p-6 border-b border-gray-200 flex justify-between items-center">
@@ -129,12 +122,6 @@
                     >
                         <option value="">All Rooms</option>
                     </select>
-                    <button 
-                        id="export-pdf-btn" 
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-                    >
-                        Export PDF
-                    </button>
                 </div>
             </div>
             <div class="flex-1 overflow-y-auto px-6 pb-6">
@@ -145,7 +132,6 @@
         </div>
     </div>
 
-    <!-- User Management Modal -->
     <div id="users-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] flex flex-col">
             <div class="p-6 border-b border-gray-200 flex justify-between items-center">
@@ -160,7 +146,6 @@
         </div>
     </div>
 
-    <!-- User Profile Modal -->
     <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4">
             <div class="p-6 border-b border-gray-200 flex justify-between items-center">
@@ -244,7 +229,7 @@
         let allUsers = {};
 
         const ROOMS = Array.from({ length: 16 }, (_, i) => 402 + i);
-        const MAX_CAPACITY = ROOMS.length * 6; // 16 rooms * 6 students = 96
+        const MAX_CAPACITY = ROOMS.length * 6;
         
         function getTodayDateKey() {
             const today = new Date();
@@ -302,14 +287,11 @@
         const logDateFilter = document.getElementById('log-date-filter');
         const logUserFilter = document.getElementById('log-user-filter');
         const logRoomFilter = document.getElementById('log-room-filter');
-        const exportPdfBtn = document.getElementById('export-pdf-btn');
         
-        // Users Modal
         const usersModal = document.getElementById('users-modal');
         const closeUsersModal = document.getElementById('close-users-modal');
         const usersContent = document.getElementById('users-content');
         
-        // Profile Modal
         const profileModal = document.getElementById('profile-modal');
         const closeProfileModal = document.getElementById('close-profile-modal');
         const profileAvatar = document.getElementById('profile-avatar');
@@ -327,7 +309,6 @@
             loadingStatus.classList.add('hidden');
         }
 
-        // Authentication Functions
         function showLoginModal() {
             loginModal.classList.remove('hidden');
         }
@@ -338,7 +319,6 @@
         }
 
         function extractNameFromEmail(email) {
-            // Extract name from email (e.g., "john.doe@example.com" -> "John Doe")
             const localPart = email.split('@')[0];
             const nameParts = localPart.split(/[._-]/);
             const name = nameParts
@@ -352,30 +332,24 @@
             userEmail = user.email;
             isAuthenticated = true;
             
-            // Update UI
             currentUserDisplay.textContent = userId;
             userInfoBar.classList.remove('hidden');
             hideLoginModal();
             
             showNotification(`Welcome back, ${userId}!`, 'success', 4000);
             
-            // Initialize Firebase after login
             await initializeFirebase();
             
-            // Load user profile
             await loadUserProfile();
             
-            // Log login activity
             await logActivity('login', `${userId} (${userEmail}) logged in to the system`);
         }
 
         async function logout() {
             if (confirm('Are you sure you want to logout?')) {
-                // Log logout activity
                 if (db && userId) {
                     await logActivity('logout', `${userId} logged out from the system`);
                     
-                    // Update user status to offline
                     const userRef = ref(db, `users/${userId}`);
                     await update(userRef, {
                         status: 'offline',
@@ -383,7 +357,6 @@
                     });
                 }
                 
-                // Sign out from Firebase Auth
                 if (auth) {
                     await signOut(auth);
                 }
@@ -392,12 +365,10 @@
                 userEmail = null;
                 isAuthenticated = false;
                 
-                // Update UI
                 userInfoBar.classList.add('hidden');
                 
                 showNotification('You have been logged out.', 'info', 3000);
                 
-                // Show login modal again
                 setTimeout(() => showLoginModal(), 500);
             }
         }
@@ -417,18 +388,14 @@
             }
         });
 
-        // Logout button handler
         logoutBtn.addEventListener('click', logout);
 
-        // Profile Modal Functions
         closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
         saveProfileBtn.addEventListener('click', () => saveUserProfile());
         
-        // Filters
         logDateFilter.addEventListener('change', () => filterActivityLog());
         logUserFilter.addEventListener('change', () => filterActivityLog());
         logRoomFilter.addEventListener('change', () => filterActivityLog());
-        exportPdfBtn.addEventListener('click', () => exportActivityLogPDF());
 
         async function loadUserProfile() {
             if (!db || !userId) return;
@@ -439,7 +406,6 @@
             if (snapshot.exists()) {
                 userProfile = { ...userProfile, ...snapshot.val() };
             } else {
-                // Create new user profile
                 userProfile = {
                     username: userId,
                     email: userEmail,
@@ -451,7 +417,6 @@
                 await set(userRef, userProfile);
             }
             
-            // Update last active
             await update(userRef, {
                 lastActive: new Date().toISOString(),
                 status: 'online'
@@ -463,7 +428,7 @@
             
             const updatedProfile = {
                 ...userProfile,
-                role: 'user', // Always set to user
+                role: 'user',
                 email: profileEmail.value,
                 updatedAt: new Date().toISOString()
             };
@@ -490,7 +455,6 @@
             const logRef = ref(db, `activity_logs/${Date.now()}`);
             await set(logRef, logEntry);
             
-            // Increment user update count
             userProfile.updateCount = (userProfile.updateCount || 0) + 1;
             const userRef = ref(db, `users/${userId}`);
             await update(userRef, { 
@@ -519,24 +483,20 @@
             activityLogModal.classList.remove('hidden');
             activityLogContent.innerHTML = '<p class="text-center text-gray-500 py-8">Loading activity log...</p>';
             
-            // Set default date to today
             const today = new Date();
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
             logDateFilter.value = `${year}-${month}-${day}`;
             
-            // Load activity log
             activityLog = await loadActivityLog();
             
-            // Populate user filter
             const users = [...new Set(activityLog.map(log => log.user))];
             logUserFilter.innerHTML = '<option value="">All Users</option>';
             users.forEach(user => {
                 logUserFilter.innerHTML += `<option value="${user}">${user}</option>`;
             });
             
-            // Populate room filter
             logRoomFilter.innerHTML = '<option value="">All Rooms</option>';
             ROOMS.forEach(room => {
                 logRoomFilter.innerHTML += `<option value="${room}">Room ${room}</option>`;
@@ -592,113 +552,6 @@
                     </div>
                 `;
             }).join('');
-        }
-
-        function exportActivityLogPDF() {
-            if (activityLog.length === 0) {
-                showNotification('No activity data to export.', 'warning', 3000);
-                return;
-            }
-            
-            const dateFilter = logDateFilter.value;
-            const userFilter = logUserFilter.value;
-            const roomFilter = logRoomFilter.value;
-            
-            let filtered = activityLog;
-            
-            if (dateFilter) filtered = filtered.filter(log => log.date === dateFilter);
-            if (userFilter) filtered = filtered.filter(log => log.user === userFilter);
-            if (roomFilter) filtered = filtered.filter(log => log.details && log.details.includes(`Room ${roomFilter}`));
-            
-            if (filtered.length === 0) {
-                showNotification('No activity data matching filters.', 'warning', 3000);
-                return;
-            }
-            
-            // Create PDF using jsPDF
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // Add title
-            doc.setFontSize(18);
-            doc.setFont(undefined, 'bold');
-            doc.text('Floor Attendance System - Activity Log', 14, 20);
-            
-            // Add filter information
-            doc.setFontSize(10);
-            doc.setFont(undefined, 'normal');
-            let yPos = 30;
-            
-            if (dateFilter) {
-                doc.text(`Date Filter: ${dateFilter}`, 14, yPos);
-                yPos += 6;
-            }
-            if (userFilter) {
-                doc.text(`User Filter: ${userFilter}`, 14, yPos);
-                yPos += 6;
-            }
-            if (roomFilter) {
-                doc.text(`Room Filter: Room ${roomFilter}`, 14, yPos);
-                yPos += 6;
-            }
-            
-            doc.text(`Generated: ${new Date().toLocaleString()}`, 14, yPos);
-            doc.text(`Total Records: ${filtered.length}`, 14, yPos + 6);
-            
-            // Prepare table data
-            const tableData = filtered.map(log => [
-                new Date(log.timestamp).toLocaleString(),
-                log.user,
-                log.action.toUpperCase(),
-                log.details,
-                log.date
-            ]);
-            
-            // Add table
-            doc.autoTable({
-                startY: yPos + 15,
-                head: [['Timestamp', 'User', 'Action', 'Details', 'Date']],
-                body: tableData,
-                styles: { 
-                    fontSize: 8,
-                    cellPadding: 2
-                },
-                headStyles: {
-                    fillColor: [102, 126, 234],
-                    textColor: 255,
-                    fontStyle: 'bold'
-                },
-                alternateRowStyles: {
-                    fillColor: [245, 247, 250]
-                },
-                columnStyles: {
-                    0: { cellWidth: 35 },
-                    1: { cellWidth: 25 },
-                    2: { cellWidth: 20 },
-                    3: { cellWidth: 70 },
-                    4: { cellWidth: 25 }
-                },
-                margin: { top: 10, left: 14, right: 14 }
-            });
-            
-            // Add footer with page numbers
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.text(
-                    `Page ${i} of ${pageCount}`,
-                    doc.internal.pageSize.getWidth() / 2,
-                    doc.internal.pageSize.getHeight() - 10,
-                    { align: 'center' }
-                );
-            }
-            
-            // Save PDF
-            const filename = `activity-log-${getTodayDateKey()}.pdf`;
-            doc.save(filename);
-            
-            showNotification('Activity log PDF exported successfully!', 'success', 3000);
         }
 
         async function loadAllUsers() {
@@ -789,7 +642,6 @@
             profileUpdateCount.textContent = user.updateCount || 0;
             profileLastActive.textContent = lastActive ? formatTimeDifference(now - lastActive) : 'Never';
             
-            // If viewing own profile, enable editing
             if (username === userId) {
                 profileEmail.disabled = false;
                 saveProfileBtn.classList.remove('hidden');
@@ -811,7 +663,6 @@
             return 'Just now';
         }
 
-        // Update user presence every minute
         setInterval(async () => {
             if (isAuthenticated && db && userId) {
                 const userRef = ref(db, `users/${userId}`);
@@ -822,7 +673,6 @@
             }
         }, 60000);
 
-        // Handle scroll behavior for user info bar
         let lastScrollTop = 0;
         window.addEventListener('scroll', () => {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -868,15 +718,12 @@
         function checkCapacityAndNotify(total) {
             const percentFull = (total / MAX_CAPACITY) * 100;
             
-            // Notify at 80% capacity
             if (percentFull >= 80 && percentFull < 95 && lastNotifiedTotal < (MAX_CAPACITY * 0.8)) {
                 showNotification(`Capacity Alert: ${total}/${MAX_CAPACITY} students (${Math.round(percentFull)}% full)`, 'warning', 7000);
             }
-            // Notify at 95% capacity (critical)
             else if (percentFull >= 95 && lastNotifiedTotal < (MAX_CAPACITY * 0.95)) {
                 showNotification(`Critical: Near Maximum Capacity! ${total}/${MAX_CAPACITY} students (${Math.round(percentFull)}% full)`, 'danger', 10000);
             }
-            // Notify at 100% capacity
             else if (percentFull >= 100 && lastNotifiedTotal < MAX_CAPACITY) {
                 showNotification(`Maximum Capacity Reached! ${total}/${MAX_CAPACITY} students`, 'danger', 0);
             }
@@ -891,27 +738,22 @@
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
             
-            // Show reminder at 7:00 PM (start of window)
             if (currentHour === 19 && currentMinute < 5) {
                 showNotification('Attendance input window is now open! You can update room attendance until 9:00 PM.', 'info', 8000);
                 hasShownInputWindowReminder = true;
             }
-            // Show reminder at 8:30 PM (30 minutes before end)
             else if (currentHour === 20 && currentMinute >= 30 && currentMinute < 35) {
                 showNotification('Reminder: Attendance input window closes in 30 minutes (9:00 PM).', 'warning', 8000);
                 hasShownInputWindowReminder = true;
             }
-            // Show reminder at 8:50 PM (10 minutes before end)
             else if (currentHour === 20 && currentMinute >= 50) {
                 showNotification('Final Reminder: Attendance input window closes in 10 minutes!', 'danger', 10000);
                 hasShownInputWindowReminder = true;
             }
         }
 
-        // Check input window every minute
         setInterval(checkInputWindowAndNotify, 60000);
         
-        // Initial check on load
         setTimeout(checkInputWindowAndNotify, 2000);
 
         async function initializeFirebase() {
@@ -958,7 +800,6 @@
                         input.value = currentCount;
                     }
                 }
-                // Update disabled state based on view mode
                 input.disabled = !isEditable;
                 input.style.opacity = isEditable ? '1' : '0.6';
                 input.style.cursor = isEditable ? 'text' : 'not-allowed';
@@ -1001,7 +842,6 @@
             const total = attendanceData.reduce((sum, doc) => sum + (doc.present_count || 0), 0);
             totalCountDisplay.textContent = total;
             
-            // Check capacity and show notifications if viewing today
             if (isViewingToday) {
                 checkCapacityAndNotify(total);
             }
@@ -1015,13 +855,11 @@
             
             isViewingToday = (viewDateKey === todayDateKey);
             
-            // Reset notification tracking when changing dates
             lastNotifiedTotal = 0;
             hasShownInputWindowReminder = false;
             
             dateDisplay.innerHTML = `Viewing Date: <strong>${formatDisplayDate(viewDateKey)}</strong>`;
             
-            // Update view mode indicator
             if (isViewingToday) {
                 viewModeIndicator.innerHTML = '<strong>Live View</strong> - Data updates in real-time';
                 viewModeIndicator.className = 'text-xs text-center mt-3 text-green-600 font-medium';
@@ -1041,14 +879,12 @@
                     console.log('No data found for today, initializing...');
                     seedInitialRooms();
                 } else if (Object.keys(data).length === 0) {
-                    // Historical date with no data
                     console.log(`No attendance data found for ${viewDateKey}`);
                     roomGrid.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">No attendance records found for this date.</p>';
                     totalCountDisplay.textContent = '0';
                     return;
                 }
                 
-                // Clear existing room cards
                 roomGrid.innerHTML = '';
                 
                 ROOMS.forEach(room => {
@@ -1222,16 +1058,13 @@
             }
         }
 
-        // Date Picker Event Handlers
         function initializeDatePicker() {
-            // Set default value to today (force current local date)
             const today = new Date();
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
             datePicker.value = `${year}-${month}-${day}`;
             
-            // Date picker change event
             datePicker.addEventListener('change', (event) => {
                 const selectedDate = new Date(event.target.value + 'T00:00:00');
                 currentViewDate = formatDateKey(selectedDate);
@@ -1239,7 +1072,6 @@
                 errorDiv.classList.add('hidden');
             });
 
-            // Today button click event
             todayBtn.addEventListener('click', () => {
                 const today = new Date();
                 const year = today.getFullYear();
@@ -1252,14 +1084,12 @@
             });
         }
 
-        // Check if user is already logged in
         async function checkAuthStatus() {
             const app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
-                    // User is signed in
                     userId = extractNameFromEmail(user.email);
                     userEmail = user.email;
                     isAuthenticated = true;
@@ -1270,7 +1100,6 @@
                     await initializeFirebase();
                     await loadUserProfile();
                 } else {
-                    // User is signed out
                     showLoginModal();
                 }
             });
