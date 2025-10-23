@@ -10,45 +10,16 @@
 </head>
 <body>
 
-    <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Login to Floor Attendance System</h2>
-            <div class="space-y-4">
-                <p class="text-center text-gray-600 mb-6">Sign in with your authorized Google account</p>
-                <button 
-                    id="google-login-btn"
-                    class="w-full py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold shadow-sm flex items-center justify-center gap-3"
-                >
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M19.9895 10.1871C19.9895 9.36767 19.9214 8.76973 19.7742 8.14966H10.1992V11.848H15.8195C15.7062 12.7671 15.0943 14.1512 13.7346 15.0813L13.7155 15.2051L16.7429 17.4969L16.9527 17.5174C18.879 15.7789 19.9895 13.221 19.9895 10.1871Z" fill="#4285F4"/>
-                        <path d="M10.1993 19.9313C12.9527 19.9313 15.2643 19.0454 16.9527 17.5174L13.7346 15.0813C12.8734 15.6682 11.7176 16.0779 10.1993 16.0779C7.50243 16.0779 5.21352 14.3395 4.39759 11.9366L4.27799 11.9466L1.13003 14.3273L1.08887 14.4391C2.76588 17.6945 6.21061 19.9313 10.1993 19.9313Z" fill="#34A853"/>
-                        <path d="M4.39748 11.9366C4.18219 11.3166 4.05759 10.6521 4.05759 9.96565C4.05759 9.27909 4.18219 8.61473 4.38615 7.99466L4.38045 7.8626L1.19304 5.44366L1.08875 5.49214C0.397576 6.84305 0.000976562 8.36008 0.000976562 9.96565C0.000976562 11.5712 0.397576 13.0882 1.08875 14.4391L4.39748 11.9366Z" fill="#FBBC05"/>
-                        <path d="M10.1993 3.85336C12.1142 3.85336 13.406 4.66168 14.1425 5.33717L17.0207 2.59107C15.253 0.985496 12.9527 0 10.1993 0C6.2106 0 2.76588 2.23672 1.08887 5.49214L4.38626 7.99466C5.21352 5.59183 7.50242 3.85336 10.1993 3.85336Z" fill="#EB4335"/>
-                    </svg>
-                    Sign in with Google
-                </button>
-                <div id="login-error" class="text-red-600 text-sm text-center hidden"></div>
-            </div>
+    <div id="page-loader" class="page-loader">
+        <div class="loader-content">
+            <div class="spinner"></div>
+            <p class="loader-text">Loading Attendance System...</p>
         </div>
     </div>
 
     <div id="app" class="min-h-screen p-6 sm:p-8">
 
         <div id="notification-container" class="fixed top-4 left-4 z-50 space-y-3 max-w-sm">
-        </div>
-
-        <div id="user-info-bar" class="user-info-bar fixed top-4 right-4 bg-white hidden z-40">
-            <span class="user-icon">👤</span>
-            <div class="user-text">
-                <p class="text-xs text-gray-500">Logged in as</p>
-                <p id="current-user-display" class="text-sm font-bold text-gray-800"></p>
-            </div>
-            <button 
-                id="logout-btn" 
-                class="logout-btn px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105"
-            >
-                Logout
-            </button>
         </div>
 
         <div class="max-w-6xl mx-auto mb-6">
@@ -132,70 +103,12 @@
         </div>
     </div>
 
-    <div id="users-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] flex flex-col">
-            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-gray-900">User Management</h2>
-                <button id="close-users-modal" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            </div>
-            <div class="flex-1 overflow-y-auto p-6">
-                <div id="users-content" class="space-y-4">
-                    <p class="text-center text-gray-500 py-8">Loading users...</p>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4">
-            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-gray-900">User Profile</h2>
-                <button id="close-profile-modal" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-            </div>
-            <div class="p-6">
-                <div class="text-center mb-6">
-                    <div class="inline-flex items-center justify-center w-20 h-20 bg-indigo-600 text-white rounded-full text-3xl font-bold mb-4">
-                        <span id="profile-avatar"></span>
-                    </div>
-                    <h3 id="profile-username" class="text-xl font-bold text-gray-900"></h3>
-                    <p id="profile-status" class="text-sm text-gray-500 mt-1"></p>
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email (optional)</label>
-                        <input 
-                            type="email" 
-                            id="profile-email" 
-                            class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-indigo-500 focus:outline-none"
-                            placeholder="user@example.com"
-                        />
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 pt-4">
-                        <div class="text-center">
-                            <p class="text-2xl font-bold text-indigo-600" id="profile-update-count">0</p>
-                            <p class="text-xs text-gray-500">Updates</p>
-                        </div>
-                        <div class="text-center">
-                            <p class="text-2xl font-bold text-purple-600" id="profile-last-active">-</p>
-                            <p class="text-xs text-gray-500">Last Active</p>
-                        </div>
-                    </div>
-                </div>
-                <button 
-                    id="save-profile-btn" 
-                    class="w-full mt-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold"
-                >
-                    Save Changes
-                </button>
-            </div>
-        </div>
-    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, update, get } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'floor-attendance-system';
 
@@ -211,27 +124,18 @@
                 };
 
         let db;
-        let auth;
-        let userId = null;
-        let userEmail = null;
+        let userId = 'system';
+        let userEmail = 'system@attendance.local';
         let currentViewDate = getTodayDateKey();
         let isViewingToday = true;
         let lastNotifiedTotal = 0;
         let hasShownInputWindowReminder = false;
-        let isAuthenticated = false;
         let sentNotifications = {
             reminder1: false,
             reminder2: false,
             reminder3: false
         };
-        let userProfile = {
-            role: 'user',
-            email: '',
-            loginTime: null,
-            updateCount: 0
-        };
         let activityLog = [];
-        let allUsers = {};
 
         const ROOMS = Array.from({ length: 16 }, (_, i) => 402 + i);
         const MAX_CAPACITY = ROOMS.length * 6;
@@ -278,34 +182,13 @@
         const todayBtn = document.getElementById('today-btn');
         const viewModeIndicator = document.getElementById('view-mode-indicator');
         const notificationContainer = document.getElementById('notification-container');
-        const loginModal = document.getElementById('login-modal');
-        const googleLoginBtn = document.getElementById('google-login-btn');
-        const loginError = document.getElementById('login-error');
-        const userInfoBar = document.getElementById('user-info-bar');
-        const currentUserDisplay = document.getElementById('current-user-display');
-        const logoutBtn = document.getElementById('logout-btn');
         
-        // Activity Log Modal
         const activityLogModal = document.getElementById('activity-log-modal');
         const closeActivityLog = document.getElementById('close-activity-log');
         const activityLogContent = document.getElementById('activity-log-content');
         const logDateFilter = document.getElementById('log-date-filter');
         const logUserFilter = document.getElementById('log-user-filter');
         const logRoomFilter = document.getElementById('log-room-filter');
-        
-        const usersModal = document.getElementById('users-modal');
-        const closeUsersModal = document.getElementById('close-users-modal');
-        const usersContent = document.getElementById('users-content');
-        
-        const profileModal = document.getElementById('profile-modal');
-        const closeProfileModal = document.getElementById('close-profile-modal');
-        const profileAvatar = document.getElementById('profile-avatar');
-        const profileUsername = document.getElementById('profile-username');
-        const profileStatus = document.getElementById('profile-status');
-        const profileEmail = document.getElementById('profile-email');
-        const profileUpdateCount = document.getElementById('profile-update-count');
-        const profileLastActive = document.getElementById('profile-last-active');
-        const saveProfileBtn = document.getElementById('save-profile-btn');
 
         function displayError(message) {
             console.error(message);
@@ -314,153 +197,9 @@
             loadingStatus.classList.add('hidden');
         }
 
-        function showLoginModal() {
-            loginModal.classList.remove('hidden');
-        }
-
-        function hideLoginModal() {
-            loginModal.classList.add('hidden');
-            loginError.classList.add('hidden');
-        }
-
-        function extractNameFromEmail(email) {
-            const localPart = email.split('@')[0];
-            const nameParts = localPart.split(/[._-]/);
-            const name = nameParts
-                .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-                .join(' ');
-            return name;
-        }
-
-        async function login(user) {
-            userId = extractNameFromEmail(user.email);
-            userEmail = user.email;
-            isAuthenticated = true;
-            
-            currentUserDisplay.textContent = userId;
-            userInfoBar.classList.remove('hidden');
-            hideLoginModal();
-            
-            showNotification(`Welcome back, ${userId}!`, 'success', 4000);
-            
-            await initializeFirebase();
-            
-            await loadUserProfile();
-            
-            await logActivity('login', `${userId} (${userEmail}) logged in to the system`);
-        }
-
-        async function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                if (db && userId) {
-                    await logActivity('logout', `${userId} logged out from the system`);
-                    
-                    const userRef = ref(db, `users/${userId}`);
-                    await update(userRef, {
-                        status: 'offline',
-                        lastActive: new Date().toISOString()
-                    });
-                }
-                
-                if (auth) {
-                    await signOut(auth);
-                }
-                
-                userId = null;
-                userEmail = null;
-                isAuthenticated = false;
-                
-                userInfoBar.classList.add('hidden');
-                userInfoBar.classList.remove('expanded');
-                
-                showNotification('You have been logged out.', 'info', 3000);
-                
-                setTimeout(() => showLoginModal(), 500);
-            }
-        }
-
-        googleLoginBtn.addEventListener('click', async () => {
-            try {
-                const provider = new GoogleAuthProvider();
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                
-                await login(user);
-            } catch (error) {
-                console.error('Login error:', error);
-                loginError.textContent = `Login failed: ${error.message}`;
-                loginError.classList.remove('hidden');
-            }
-        });
-
-        userInfoBar.addEventListener('click', (e) => {
-            if (e.target.id === 'logout-btn' || e.target.closest('#logout-btn')) {
-                return;
-            }
-            userInfoBar.classList.toggle('expanded');
-        });
-
-        logoutBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            logout();
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!userInfoBar.contains(e.target)) {
-                userInfoBar.classList.remove('expanded');
-            }
-        });
-
-        closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
-        saveProfileBtn.addEventListener('click', () => saveUserProfile());
-        
         logDateFilter.addEventListener('change', () => filterActivityLog());
         logUserFilter.addEventListener('change', () => filterActivityLog());
         logRoomFilter.addEventListener('change', () => filterActivityLog());
-
-        async function loadUserProfile() {
-            if (!db || !userId) return;
-            
-            const userRef = ref(db, `users/${userId}`);
-            const snapshot = await get(userRef);
-            
-            if (snapshot.exists()) {
-                userProfile = { ...userProfile, ...snapshot.val() };
-            } else {
-                userProfile = {
-                    username: userId,
-                    email: userEmail,
-                    role: 'user',
-                    loginTime: new Date().toISOString(),
-                    updateCount: 0,
-                    createdAt: new Date().toISOString()
-                };
-                await set(userRef, userProfile);
-            }
-            
-            await update(userRef, {
-                lastActive: new Date().toISOString(),
-                status: 'online'
-            });
-        }
-
-        async function saveUserProfile() {
-            if (!db || !userId) return;
-            
-            const updatedProfile = {
-                ...userProfile,
-                role: 'user',
-                email: profileEmail.value,
-                updatedAt: new Date().toISOString()
-            };
-            
-            const userRef = ref(db, `users/${userId}`);
-            await update(userRef, updatedProfile);
-            
-            userProfile = updatedProfile;
-            showNotification('Profile updated successfully!', 'success', 3000);
-            profileModal.classList.add('hidden');
-        }
 
         async function logActivity(action, details) {
             if (!db || !userId) return;
@@ -475,13 +214,6 @@
             
             const logRef = ref(db, `activity_logs/${Date.now()}`);
             await set(logRef, logEntry);
-            
-            userProfile.updateCount = (userProfile.updateCount || 0) + 1;
-            const userRef = ref(db, `users/${userId}`);
-            await update(userRef, { 
-                updateCount: userProfile.updateCount,
-                lastActive: new Date().toISOString()
-            });
         }
 
         async function loadActivityLog() {
@@ -575,124 +307,7 @@
             }).join('');
         }
 
-        async function loadAllUsers() {
-            if (!db) return {};
-            
-            const usersRef = ref(db, 'users');
-            const snapshot = await get(usersRef);
-            
-            if (snapshot.exists()) {
-                return snapshot.val();
-            }
-            return {};
-        }
 
-        async function showUsersManagement() {
-            usersModal.classList.remove('hidden');
-            usersContent.innerHTML = '<p class="text-center text-gray-500 py-8">Loading users...</p>';
-            
-            allUsers = await loadAllUsers();
-            
-            if (Object.keys(allUsers).length === 0) {
-                usersContent.innerHTML = '<p class="text-center text-gray-500 py-8">No users found.</p>';
-                return;
-            }
-            
-            const now = new Date();
-            usersContent.innerHTML = Object.entries(allUsers).map(([username, user]) => {
-                const lastActive = user.lastActive ? new Date(user.lastActive) : null;
-                const isOnline = lastActive && (now - lastActive) < 5 * 60 * 1000; // 5 minutes
-                const statusBadge = isOnline ? 
-                    '<span class="user-badge user-badge-online">● Online</span>' : 
-                    '<span class="user-badge user-badge-offline">○ Offline</span>';
-                
-                const lastActiveStr = lastActive ? 
-                    formatTimeDifference(now - lastActive) : 'Never';
-                
-                return `
-                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <h3 class="font-bold text-lg">${username}</h3>
-                                    ${statusBadge}
-                                </div>
-                                <div class="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                        <p class="text-gray-500">Updates</p>
-                                        <p class="font-semibold">${user.updateCount || 0}</p>
-                                    </div>
-                                    <div>
-                                        <p class="text-gray-500">Last Active</p>
-                                        <p class="font-semibold">${lastActiveStr}</p>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <p class="text-gray-500">Email</p>
-                                        <p class="font-semibold">${user.email || 'Not set'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <button 
-                                onclick="window.showUserProfile('${username}')"
-                                class="ml-4 px-3 py-1 bg-indigo-500 text-white text-xs rounded-lg hover:bg-indigo-600 transition-colors"
-                            >
-                                View Profile
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        window.showUserProfile = async function(username) {
-            usersModal.classList.add('hidden');
-            profileModal.classList.remove('hidden');
-            
-            const user = allUsers[username] || {};
-            
-            profileAvatar.textContent = username.charAt(0).toUpperCase();
-            profileUsername.textContent = username;
-            
-            const lastActive = user.lastActive ? new Date(user.lastActive) : null;
-            const now = new Date();
-            const isOnline = lastActive && (now - lastActive) < 5 * 60 * 1000;
-            profileStatus.textContent = isOnline ? 'Online' : 'Offline';
-            profileStatus.className = isOnline ? 'text-sm text-green-600 mt-1 font-medium' : 'text-sm text-gray-500 mt-1';
-            
-            profileEmail.value = user.email || '';
-            profileUpdateCount.textContent = user.updateCount || 0;
-            profileLastActive.textContent = lastActive ? formatTimeDifference(now - lastActive) : 'Never';
-            
-            if (username === userId) {
-                profileEmail.disabled = false;
-                saveProfileBtn.classList.remove('hidden');
-            } else {
-                profileEmail.disabled = true;
-                saveProfileBtn.classList.add('hidden');
-            }
-        };
-
-        function formatTimeDifference(ms) {
-            const seconds = Math.floor(ms / 1000);
-            const minutes = Math.floor(seconds / 60);
-            const hours = Math.floor(minutes / 60);
-            const days = Math.floor(hours / 24);
-            
-            if (days > 0) return `${days}d ago`;
-            if (hours > 0) return `${hours}h ago`;
-            if (minutes > 0) return `${minutes}m ago`;
-            return 'Just now';
-        }
-
-        setInterval(async () => {
-            if (isAuthenticated && db && userId) {
-                const userRef = ref(db, `users/${userId}`);
-                await update(userRef, {
-                    lastActive: new Date().toISOString(),
-                    status: 'online'
-                });
-            }
-        }, 60000);
 
         function showNotification(message, type = 'info', duration = 5000) {
             const notification = document.createElement('div');
@@ -740,7 +355,7 @@
         }
 
         function checkInputWindowAndNotify() {
-            if (!isViewingToday || !isAuthenticated || !userEmail) return;
+            if (!isViewingToday) return;
             
             const now = new Date();
             const currentHour = now.getHours();
@@ -794,24 +409,33 @@
             }
         }
 
+        checkInputWindowAndNotify();
         setInterval(checkInputWindowAndNotify, 60000);
-        
-        setTimeout(checkInputWindowAndNotify, 2000);
+
+        function hidePageLoader() {
+            const loader = document.getElementById('page-loader');
+            if (loader && !loader.classList.contains('hidden')) {
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 200);
+                }, 100);
+            }
+        }
+
+        setTimeout(() => {
+            hidePageLoader();
+        }, 8000);
 
         async function initializeFirebase() {
             try {
-                if (!isAuthenticated) {
-                    console.log('User not authenticated. Waiting for login...');
-                    return;
-                }
-
                 if (Object.keys(firebaseConfig).length === 0) {
                     throw new Error("Firebase configuration is missing. Cannot initialize database.");
                 }
 
                 const app = initializeApp(firebaseConfig);
                 db = getDatabase(app);
-                auth = getAuth(app);
 
                 try {
                     const analytics = getAnalytics(app);
@@ -823,9 +447,11 @@
                 loadingStatus.textContent = 'Connected. Setting up real-time listener...';
                 setupRealtimeListener();
                 checkAndRunDailyReset();
+                hidePageLoader();
 
             } catch (error) {
                 displayError(`Firebase Initialization failed: ${error.message}`);
+                hidePageLoader();
             }
         }
 
@@ -1054,11 +680,6 @@
         async function updateAttendance(roomNumber, value) {
             if (!db) return;
 
-            if (!isAuthenticated) {
-                displayError('You must be logged in to update attendance.');
-                return;
-            }
-
             if (!isWithinAllowedTime()) {
                 displayError('Attendance can only be updated between 7:00 PM to 9:00 PM.');
                 return;
@@ -1087,25 +708,23 @@
                     timestamp: new Date().toISOString()
                 });
                 
-                // Log activity
                 await logActivity('update', `Room ${roomNumber} attendance set to ${count} students`);
-                
-                // Show success notification for significant changes
-                if (Math.abs(count - (parseInt(value) || 0)) >= 3) {
-                    showNotification(`Room ${roomNumber} updated by ${userId}: ${count} students present`, 'success', 3000);
-                }
 
             } catch (error) {
                 displayError(`Failed to update attendance for Room ${roomNumber}: ${error.message}`);
             }
         }
 
-        function initializeDatePicker() {
+        function setDatePickerToToday() {
             const today = new Date();
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
             datePicker.value = `${year}-${month}-${day}`;
+        }
+
+        function initializeDatePicker() {
+            setDatePickerToToday();
             
             datePicker.addEventListener('change', (event) => {
                 const selectedDate = new Date(event.target.value + 'T00:00:00');
@@ -1115,39 +734,14 @@
             });
 
             todayBtn.addEventListener('click', () => {
-                const today = new Date();
-                const year = today.getFullYear();
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const day = String(today.getDate()).padStart(2, '0');
-                datePicker.value = `${year}-${month}-${day}`;
+                setDatePickerToToday();
                 currentViewDate = getTodayDateKey();
                 setupRealtimeListener(currentViewDate);
                 errorDiv.classList.add('hidden');
             });
         }
 
-        async function checkAuthStatus() {
-            const app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = extractNameFromEmail(user.email);
-                    userEmail = user.email;
-                    isAuthenticated = true;
-                    currentUserDisplay.textContent = userId;
-                    userInfoBar.classList.remove('hidden');
-                    
-                    db = getDatabase(app);
-                    await initializeFirebase();
-                    await loadUserProfile();
-                } else {
-                    showLoginModal();
-                }
-            });
-        }
-        
-        checkAuthStatus();
+        initializeFirebase();
         initializeDatePicker();
 
     </script>
